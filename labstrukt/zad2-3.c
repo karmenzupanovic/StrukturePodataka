@@ -27,6 +27,10 @@ int Izbrisi(Pozicija);
 int UnesiIspred(Pozicija);
 int UnesiIzad(Pozicija);
 int BrisiSve(Pozicija);
+int Sortiraj(Pozicija);
+int CitajDat(Pozicija);
+int PisiDat(Pozicija);
+
 
 
 int main() {
@@ -49,7 +53,11 @@ int main() {
 		printf("\n 7 - Trazi zadnji");
 		printf("\n 8 - Unos ispred");
 		printf("\n 9 - Unos izad");
-		printf("\n 10 - Brisi sve");
+		//printf("\n 10 - Brisi sve");
+		printf("\n 11 - Sortiraj abecedno");
+		printf("\n 12 - Citaj iz datoteke");
+		printf("\n 13 - Pisi u datoteku");
+
 		printf("\n 0 - Izlaz");
 		printf("\nNapisi svoj izbor: ");
 		scanf("%d", &izbor);
@@ -98,10 +106,22 @@ int main() {
 			provjera = UnesiIzad(&Head);
 			if (provjera == -1) puts("Nije pronaden element ");
 			break;
-		case 10:
+		//case 10:
 			BrisiSve(&Head);
 			break;
-
+		case 11:
+			Sortiraj(&Head);
+			printf("\n SORTIRAN POPIS LJUDI:\n");
+			Ispis(Head.next);
+			break;
+		case 12:
+			provjera = CitajDat(&Head); 
+			if (provjera == -1) printf("Problem s otvaranjem datoteke!\n");
+			break;
+		case 13:
+			provjera = PisiDat(Head.next);
+			if (provjera == -1) printf("Problem s otvaranjem datoteke!\n");
+			break;
 		case 0:
 			printf("Izlaz iz programa\n");
 			break;
@@ -116,7 +136,7 @@ int main() {
 int UnosP( Pozicija P) {
 
 	Pozicija q;
-	q = (Pozicija)malloc(sizeof(struct osoba));
+	q = (Pozicija)malloc(sizeof(struct osoba));		//mogla je bit zasebna funkcija
 
 	if (q == NULL) return NULL;
 
@@ -247,6 +267,91 @@ int UnesiIzad(Pozicija P)
 	if (P == NULL) return -1;
 	UnosP(P);
 
+	return 0;
+}
+
+int Sortiraj(Pozicija p)
+{
+	Pozicija prevj = p, j = NULL, end = NULL, temp = NULL;
+
+	while (p->next != end)
+	{
+		prevj = p;
+		j = p->next;
+		while (j->next != end)
+		{
+			if (strcmp(j->prezime, j->next->prezime) > 0)
+			{
+
+				temp = j->next;
+				prevj->next = temp;
+				j->next = temp->next;
+				temp->next = j;
+
+				j = temp;
+			}
+			prevj = j;
+			j = j->next;
+		}
+		end = j;
+	}
+
+	return 0;
+}
+
+int CitajDat(Pozicija p)
+{
+	Pozicija temp = NULL;
+	FILE * dat = NULL;
+	char str[20];
+
+	printf("Upisi ime datoteke: ");
+	scanf(" %s", str);
+	if (strchr(str, '.') == NULL)
+		strcat(str, ".txt");
+
+	dat = fopen(str, "r");
+
+	if (dat == NULL)
+		return -1;
+	while (!feof(dat))
+	{
+		temp = (Pozicija)malloc(sizeof(struct osoba));
+
+		if (temp == NULL) return -1;
+
+		fscanf(dat, " %s %s %d", temp->ime, temp->prezime, &temp->god);
+		temp->next = p->next;
+		p->next = temp;
+		p = temp;
+	}
+	fclose(dat);
+
+	return 0;
+}
+
+int PisiDat(Pozicija p)
+{
+	FILE * dat;
+	char str[20];
+
+	printf("Upisi ime datoteke: ");
+	scanf(" %s", str);
+	if (strchr(str, '.') == NULL)
+		strcat(str, ".txt");
+
+	dat = fopen(str, "w");
+
+	if (dat == NULL)
+		return -1;
+	fprintf(dat, "POPIS LJUDI\n\n");
+	while (p != NULL)
+	{
+		fprintf(dat, "%s\t%s\t%d\n", p->ime, p->prezime, p->god);
+		p = p->next;
+	}
+
+	fclose(dat);
 	return 0;
 }
 
